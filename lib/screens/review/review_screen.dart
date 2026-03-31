@@ -18,8 +18,12 @@ class ReviewScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () async {
-              final session = await ctrl.saveCurrentSession();
-              Get.offAll(() => PlaybackScreen(session: session));
+              try {
+                final session = await ctrl.saveCurrentSession();
+                Get.offAll(() => PlaybackScreen(session: session));
+              } catch (_) {
+                Get.snackbar('Error', 'Failed to save story. Please try again.');
+              }
             },
             child: const Text(
               'Play Story',
@@ -73,8 +77,12 @@ class ReviewScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: ElevatedButton.icon(
                 onPressed: () async {
-                  final session = await ctrl.saveCurrentSession();
-                  Get.offAll(() => PlaybackScreen(session: session));
+                  try {
+                    final session = await ctrl.saveCurrentSession();
+                    Get.offAll(() => PlaybackScreen(session: session));
+                  } catch (_) {
+                    Get.snackbar('Error', 'Failed to save story. Please try again.');
+                  }
                 },
                 icon: const Icon(Icons.play_arrow),
                 label: const Text('Play Story'),
@@ -178,14 +186,17 @@ class _PageReviewCardState extends State<_PageReviewCard> {
             else if (_isEditing)
               Column(
                 children: [
-                  TextField(
-                    controller: _textCtrl,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Edit text here...',
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 250),
+                    child: TextField(
+                      controller: _textCtrl,
+                      maxLines: null,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Edit text here...',
+                      ),
+                      style: const TextStyle(fontSize: 16),
                     ),
-                    style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   Align(

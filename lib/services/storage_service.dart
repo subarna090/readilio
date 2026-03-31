@@ -92,7 +92,7 @@ class StorageService {
     await _sessions.delete(id);
   }
 
-  void _purgeExpiredSessions() {
+  void _purgeExpiredSessions() async {
     final cutoff = DateTime.now()
         .subtract(const Duration(days: _sessionRetentionDays));
     final expired = _sessions.values
@@ -100,7 +100,7 @@ class StorageService {
         .map((s) => s.id)
         .toList();
     for (final id in expired) {
-      deleteSession(id);
+      await deleteSession(id);
     }
   }
 

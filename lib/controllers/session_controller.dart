@@ -87,6 +87,7 @@ class SessionController extends GetxController {
           avgConfidence: result.avgConfidence,
         ));
       } catch (e) {
+        errorMessage.value = 'Failed to process page ${i + 1}';
         processedPages.add(StoryPage(
           pageNumber: i + 1,
           imagePath: capturedImagePaths[i],

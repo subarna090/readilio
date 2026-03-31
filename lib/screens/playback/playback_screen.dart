@@ -12,8 +12,7 @@ class PlaybackScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ctrl = Get.put(PlaybackController());
-    ctrl.init(session);
+    final ctrl = Get.put(PlaybackController(session));
 
     return Scaffold(
       backgroundColor: Colors.white,

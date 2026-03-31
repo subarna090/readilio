@@ -35,26 +35,32 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   Future<void> _initCamera() async {
-    final status = await Permission.camera.request();
-    if (status.isDenied) {
-      setState(() => _guidanceMessage = 'Camera permission required');
-      return;
+    try {
+      final status = await Permission.camera.request();
+      if (status.isDenied) {
+        if (mounted) setState(() => _guidanceMessage = 'Camera permission required');
+        return;
+      }
+
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) {
+        if (mounted) setState(() => _guidanceMessage = 'No camera found');
+        return;
+      }
+
+      _cameraController = CameraController(
+        cameras.first,
+        ResolutionPreset.high,
+        enableAudio: false,
+      );
+
+      await _cameraController!.initialize();
+      if (mounted) setState(() => _isInitialized = true);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _guidanceMessage = 'Camera error: ${e.toString()}');
+      }
     }
-
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) {
-      setState(() => _guidanceMessage = 'No camera found');
-      return;
-    }
-
-    _cameraController = CameraController(
-      cameras.first,
-      ResolutionPreset.high,
-      enableAudio: false,
-    );
-
-    await _cameraController!.initialize();
-    if (mounted) setState(() => _isInitialized = true);
   }
 
   Future<void> _capture() async {
@@ -88,6 +94,10 @@ class _CameraScreenState extends State<CameraScreen>
 
   void _retryLast() {
     _sessionCtrl.retryLastCapture();
+    setState(() => _lastCapturePath = null);
+  }
+
+  void _clearPreview() {
     setState(() => _lastCapturePath = null);
   }
 
@@ -126,14 +136,17 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
+        fit: StackFit.expand,
         children: [
           // Camera preview
           if (_isInitialized && _cameraController != null)
             Positioned.fill(
-              child: CameraPreview(_cameraController!),
+              child: _buildFullScreenPreview(screenSize),
             )
           else
             const Center(child: CircularProgressIndicator(color: Colors.white)),
@@ -162,10 +175,10 @@ class _CameraScreenState extends State<CameraScreen>
             ),
           ),
 
-          // Guidance overlay
+          // Guidance overlay — sits just above the bottom controls
           if (_guidanceMessage.isNotEmpty)
             Positioned(
-              bottom: 180,
+              bottom: MediaQuery.of(context).size.height * 0.28,
               left: 16,
               right: 16,
               child: Container(
@@ -182,20 +195,49 @@ class _CameraScreenState extends State<CameraScreen>
               ),
             ),
 
-          // Bottom controls
+          // Bottom controls — wrapped in SafeArea to respect nav bar
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            child: _BottomControls(
-              lastCapturePath: _lastCapturePath,
-              isCapturing: _isCapturing,
-              onCapture: _capture,
-              onRetry: _retryLast,
-              onProceed: _proceed,
+            child: SafeArea(
+              top: false,
+              child: _BottomControls(
+                lastCapturePath: _lastCapturePath,
+                isCapturing: _isCapturing,
+                onCapture: _capture,
+                onRetry: _retryLast,
+                onNextPage: _clearPreview,
+                onProceed: _proceed,
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFullScreenPreview(Size screenSize) {
+    final controller = _cameraController;
+    final previewSize = controller?.value.previewSize;
+
+    if (controller == null || previewSize == null) {
+      return const ColoredBox(color: Colors.black);
+    }
+
+    // Fill the full screen while preserving the native camera aspect ratio.
+    return ClipRect(
+      child: SizedBox(
+        width: screenSize.width,
+        height: screenSize.height,
+        child: FittedBox(
+          fit: BoxFit.cover,
+          child: SizedBox(
+            width: previewSize.height,
+            height: previewSize.width,
+            child: CameraPreview(controller),
+          ),
+        ),
       ),
     );
   }
@@ -227,6 +269,7 @@ class _BottomControls extends StatelessWidget {
   final bool isCapturing;
   final VoidCallback onCapture;
   final VoidCallback onRetry;
+  final VoidCallback onNextPage;
   final VoidCallback onProceed;
 
   const _BottomControls({
@@ -234,6 +277,7 @@ class _BottomControls extends StatelessWidget {
     required this.isCapturing,
     required this.onCapture,
     required this.onRetry,
+    required this.onNextPage,
     required this.onProceed,
   });
 
@@ -241,7 +285,7 @@ class _BottomControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final ctrl = Get.find<SessionController>();
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
@@ -266,7 +310,7 @@ class _BottomControls extends StatelessWidget {
                   ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: onNextPage,
                   icon: const Icon(Icons.add_a_photo),
                   label: const Text('Next Page'),
                   style: ElevatedButton.styleFrom(

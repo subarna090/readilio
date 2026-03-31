@@ -5,7 +5,9 @@ import '../services/tts_service.dart';
 class PlaybackController extends GetxController {
   final TtsService _tts = Get.find();
 
-  late StorySession session;
+  final StorySession session;
+
+  PlaybackController(this.session);
 
   final currentPageIndex = 0.obs;
   final currentWordIndex = (-1).obs;
@@ -17,8 +19,9 @@ class PlaybackController extends GetxController {
   final List<_PageBoundary> _pageBoundaries = [];
   List<String> _allWords = [];
 
-  void init(StorySession s) {
-    session = s;
+  @override
+  void onInit() {
+    super.onInit();
     _buildWordList();
   }
 
@@ -30,7 +33,7 @@ class PlaybackController extends GetxController {
       _pageBoundaries.add(_PageBoundary(
         pageIndex: page.pageNumber - 1,
         startWord: offset,
-        endWord: offset + page.words.length - 1,
+        endWord: page.words.isEmpty ? offset : offset + page.words.length - 1,
       ));
       _allWords.addAll(page.words);
       offset += page.words.length;
@@ -38,23 +41,26 @@ class PlaybackController extends GetxController {
   }
 
   List<String> get currentPageWords {
-    final page = session.pages[currentPageIndex.value];
-    return page.words;
+    final idx = currentPageIndex.value;
+    if (idx < 0 || idx >= session.pages.length) return [];
+    return session.pages[idx].words;
   }
 
   int get localWordIndex {
-    final boundary = _pageBoundaries[currentPageIndex.value];
-    final local = currentWordIndex.value - boundary.startWord;
-    return local;
+    final idx = currentPageIndex.value;
+    if (idx < 0 || idx >= _pageBoundaries.length) return -1;
+    if (currentWordIndex.value < 0) return -1;
+    return currentWordIndex.value - _pageBoundaries[idx].startWord;
   }
 
   Future<void> play() async {
-    if (_allWords.isEmpty) return;
+    if (_allWords.isEmpty || _pageBoundaries.isEmpty) return;
 
     isPlaying.value = true;
     isDone.value = false;
 
-    final startOffset = _pageBoundaries[currentPageIndex.value].startWord;
+    final pageIdx = currentPageIndex.value.clamp(0, _pageBoundaries.length - 1);
+    final startOffset = _pageBoundaries[pageIdx].startWord;
     final wordsFromHere = _allWords.sublist(startOffset);
 
     await _tts.speakWithWordSync(
@@ -73,6 +79,7 @@ class PlaybackController extends GetxController {
   }
 
   void _updatePageForWord(int globalIdx) {
+    if (_pageBoundaries.isEmpty || globalIdx < 0) return;
     for (final boundary in _pageBoundaries) {
       if (globalIdx >= boundary.startWord && globalIdx <= boundary.endWord) {
         if (currentPageIndex.value != boundary.pageIndex) {

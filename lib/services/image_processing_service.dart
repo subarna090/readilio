@@ -71,7 +71,7 @@ class ImageProcessingService {
       sum += p;
     }
     final avgBrightness = sum / pixels.length;
-    final isToooDark = avgBrightness < 60;
+    final isTooDark = avgBrightness < 60;
 
     // Blur check: variance of Laplacian (simple approximation)
     // We approximate by checking variance across the grayscale values
@@ -84,7 +84,7 @@ class ImageProcessingService {
     final isTooBlurry = variance < 200;
 
     return CaptureGuidance(
-      isTooDark: isToooDark,
+      isTooDark: isTooDark,
       isTooBlurry: isTooBlurry,
     );
   }

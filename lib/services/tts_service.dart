@@ -67,6 +67,7 @@ class TtsService {
   }
 
   int _findWordIndex(List<String> words, int charOffset) {
+    if (words.isEmpty || charOffset < 0) return -1;
     int pos = 0;
     for (int i = 0; i < words.length; i++) {
       if (charOffset >= pos && charOffset < pos + words[i].length) {

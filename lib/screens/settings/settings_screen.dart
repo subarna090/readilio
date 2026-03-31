@@ -95,24 +95,32 @@ class _VoiceSpeedSettingState extends State<_VoiceSpeedSetting> {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.speed),
-      title: const Text('Reading speed'),
-      subtitle: Slider(
-        value: _speed,
-        min: 0.75,
-        max: 1.5,
-        divisions: 3,
-        label: '${_speed}x',
-        activeColor: AppColors.primary,
-        onChanged: (v) async {
-          setState(() => _speed = v);
-          final p = await SharedPreferences.getInstance();
-          await p.setDouble('tts_speed', v);
-        },
-      ),
-      trailing: Text('${_speed}x',
-          style: const TextStyle(fontWeight: FontWeight.w600)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          leading: const Icon(Icons.speed),
+          title: const Text('Reading speed'),
+          trailing: Text('${_speed}x',
+              style: const TextStyle(fontWeight: FontWeight.w600)),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(56, 0, 16, 8),
+          child: Slider(
+            value: _speed,
+            min: 0.75,
+            max: 1.5,
+            divisions: 3,
+            label: '${_speed}x',
+            activeColor: AppColors.primary,
+            onChanged: (v) async {
+              setState(() => _speed = v);
+              final p = await SharedPreferences.getInstance();
+              await p.setDouble('tts_speed', v);
+            },
+          ),
+        ),
+      ],
     );
   }
 }

@@ -27,10 +27,6 @@ dependencies:
   # Text-to-speech
   flutter_tts: ^4.2.0
 
-  # Audio service (background playback)
-  audio_service: ^0.18.16
-  just_audio: ^0.9.43
-
   # Local storage
   hive_flutter: ^1.1.0
   shared_preferences: ^2.3.3

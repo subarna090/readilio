@@ -36,6 +36,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
   ];
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   void _finish() {
     Get.find<StorageService>().setOnboardingDone();
     Get.offAll(() => const CameraScreen());
