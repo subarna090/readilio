@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unzip -q -l Readilio_Spec_v1.0.docx)",
+      "Read(//private/tmp/**)",
+      "Bash(unzip -q /Users/subarnadas/GenAI/readilio/Readilio_Spec_v1.0.docx)",
+      "Bash(python3:*)",
+      "Bash(find /Users/subarnadas -type f \\\\\\(-name *.dart -o -name *.java -o -name *.kt \\\\\\))",
+      "Bash(grep -n ^[0-9]+. /Users/subarnadas/.claude/projects/-Users-subarnadas-GenAI-readilio/fc734cab-3d49-4f71-ba45-f67bb1fc12ee/tool-results/bsb9sjtpy.txt)",
+      "Bash(flutter --version)",
+      "Bash(xcode-select -p)",
+      "Bash(java -version)",
+      "Bash(brew --version)",
+      "Bash(brew install:*)",
+      "Bash(flutter doctor:*)",
+      "Bash(flutter create:*)",
+      "Bash(mv /Users/subarnadas/GenAI/readilio/readilio/* /Users/subarnadas/GenAI/readilio/)",
+      "Bash(mv /Users/subarnadas/GenAI/readilio/readilio/.* /Users/subarnadas/GenAI/readilio/)",
+      "Bash(flutter pub:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(dart fix:*)",
+      "Bash(flutter emulators:*)",
+      "Bash(flutter run:*)",
+      "Bash(rm -rf ~/Library/Caches/Google)",
+      "Bash(rm -rf ~/Library/Caches/com.google.android.studio*)",
+      "Bash(rm -rf ~/.gradle/caches)",
+      "Bash(rm -rf ~/.pub-cache/hosted)",
+      "Bash(rm -rf ~/Library/Android/sdk/.temp)",
+      "Bash(rm -rf ~/Library/Caches/Google/googler_nix)",
+      "Bash(rm -rf ~/Library/Caches/Google/com.*)",
+      "Bash(flutter clean:*)",
+      "Bash(gh auth:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"Initial commit: Readilio Flutter app:*)"
+    ]
+  }
+}
